@@ -17,6 +17,7 @@
           <div class="relative">
             <img class="absolute left-4 top-3" src="/search.svg" alt="" />
             <input
+              @input="onChangeSearchInput"
               class="border rounded-md outline-none focus:border-gray-400 py-2 pl-12 pr-4"
               type="text"
               placeholder=" Search..."
@@ -51,21 +52,28 @@ import Drawer from './components/Drawer.vue'
 const items = ref([])
 
 const filters = reactive({
-  sortBy: '',
+  sortBy: 'title',
   searchQuery: ''
 })
 const fetchItems = async () => {
   try {
-    const { data } = await axios.get(
-      'https://604781a0efa572c1.mokky.dev/items?sortBy=' + filters.sortBy
-    )
+    const params = {
+      sortBy: filters.sortBy
+    }
+
+    if (filters.searchQuery) {
+      params.title = `*${filters.searchQuery}*`
+    }
+
+    const { data } = await axios.get(`https://604781a0efa572c1.mokky.dev/items`, { params })
     items.value = data
   } catch (err) {
     console.log(err)
   }
 }
-
 const onChangeSelect = (event) => [(filters.sortBy = event.target.value)]
+
+const onChangeSearchInput = (event) => [(filters.searchQuery = event.target.value)]
 
 onMounted(fetchItems)
 
